@@ -25,7 +25,7 @@ For a standard synchronous operation, the following JSON object is returned:
 }
 ```
 
-HTTP code must be 200.
+HTTP code must be 200 or 201.
 
 ### Error
 
@@ -68,14 +68,14 @@ Here are a few GET query examples of the different filtering methods mentioned a
 
 ## Database
 
-The Virtual Library API supports only PostgreSQL database. Running 
+The Virtual Library API only supports PostgreSQL database. if you have Docker installed, you can create a container running an instance of PostgreSQL compatible with the standard `config.yml` by running:
 ```console
-docker run --rm --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=canonical_api -d -p 5432:5432postgres
+docker run --rm --name postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=canonical_api -v ./postgresql.conf:/etc/postgresql/postgresql.conf -d -p 5432:5432 postgres
 docker cp database_structure.sql postgres:/database_structure.sql
 docker exec -it postgres bash
-psql -U postgres -d canonical_api -a -f /database_structure.sql
+psql -U postgres -d canonical_api -a -f /database_structure.sql # inside the container's shell
 ```
-you can create a container running an instance of PostgreSQL compatible with the standard `config.yml`. Run `docker stop postgres` to stop it.
+. Run `docker stop postgres` to stop it.
 
 ## Testing
 
