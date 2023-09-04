@@ -6,11 +6,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// represents the server configuration
 type Config struct {
 	ServerPort int    `yaml:"server_port"`
 	DSN        string `yaml:"dsn"`
 }
 
+// loads configurations from .yml file
 func Load(file string) (*Config, error) {
 
 	var cfg Config

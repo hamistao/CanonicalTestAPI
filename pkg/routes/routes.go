@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// configures the server's endpoints and database middleware
 func Router(serv service.Service) *gin.Engine {
 	router := gin.Default()
 

@@ -11,6 +11,7 @@ type Service struct {
 	DB *dbx.DB
 }
 
+// retrieves a book from the database by its ID.
 func (sv *Service) GetBook(id string) (models.Book, error) {
 	query := sv.DB.Select("*").From("book").Where(dbx.HashExp{"id": id})
 
@@ -20,8 +21,9 @@ func (sv *Service) GetBook(id string) (models.Book, error) {
 	return book, err
 }
 
-func (sv *Service) GetCollection(id string) (models.Collection, error) {
-	query := sv.DB.Select("*").From("collection").Where(dbx.HashExp{"id": id})
+// retrieves a collection from the database by its name.
+func (sv *Service) GetCollection(name string) (models.Collection, error) {
+	query := sv.DB.Select("*").From("collection").Where(dbx.HashExp{"id": name})
 
 	var collection models.Collection
 	err := query.One(&collection)
@@ -29,6 +31,7 @@ func (sv *Service) GetCollection(id string) (models.Collection, error) {
 	return collection, err
 }
 
+// inserts a new book into the database.
 func (sv *Service) InsertBook(book models.Book) error {
 	uuid, err := exec.Command("uuidgen").Output()
 	if err != nil {
@@ -44,6 +47,7 @@ func (sv *Service) InsertBook(book models.Book) error {
 	return nil
 }
 
+// inserts a new collection into the database.
 func (sv *Service) InsertCollection(collection models.Collection) error {
 	if err := sv.DB.Model(&collection).Insert(); err != nil {
 		return err
@@ -52,16 +56,19 @@ func (sv *Service) InsertCollection(collection models.Collection) error {
 	return nil
 }
 
+// adds a book to a collection.
 func (sv *Service) Collect(collectionName, bookID string) error {
 	_, err := sv.DB.Insert("collectionbook", dbx.Params{"collection_name": collectionName, "book_uuid": bookID}).Execute()
 	return err
 }
 
+// removes a book from a collection.
 func (sv *Service) Discard(collectionName, bookID string) error {
 	_, err := sv.DB.Delete("collectionbook", dbx.HashExp{"collection_name": collectionName, "book_uuid": bookID}).Execute()
 	return err
 }
 
+// deletes a book from the database.
 func (sv *Service) DeleteBook(bookID string) error {
 	book := models.Book{ID: bookID}
 	if _, err := sv.DB.Delete("collectionbook", dbx.HashExp{"book_uuid": bookID}).Execute(); err != nil {
@@ -75,6 +82,7 @@ func (sv *Service) DeleteBook(bookID string) error {
 	return nil
 }
 
+// deletes a collection from the database.
 func (sv *Service) DeleteCollection(collectionName string) error {
 	collection := models.Collection{Id: collectionName}
 	if err := sv.DB.Model(&collection).Delete(); err != nil {
@@ -84,6 +92,7 @@ func (sv *Service) DeleteCollection(collectionName string) error {
 	return nil
 }
 
+// retrieves all collections from the database.
 func (sv *Service) GetAllCollections() ([]models.Collection, error) {
 	var collections []models.Collection
 	err := sv.DB.Select("*").From("collection").All(&collections)
@@ -91,6 +100,7 @@ func (sv *Service) GetAllCollections() ([]models.Collection, error) {
 	return collections, err
 }
 
+// performs a filtered query for books in the database.
 func (sv *Service) Query(filter models.QueryFilter) ([]models.Book, error) {
 	query := sv.DB.Select("*").From("book")
 
@@ -133,6 +143,7 @@ func (sv *Service) Query(filter models.QueryFilter) ([]models.Book, error) {
 	return books, err
 }
 
+// updates book information in the database.
 func (sv *Service) UpdateBook(bookID string, updates models.Book) error {
 	updateValues := make(dbx.Params)
 
@@ -158,6 +169,7 @@ func (sv *Service) UpdateBook(bookID string, updates models.Book) error {
 	return err
 }
 
+// updates collection information in the database.
 func (sv *Service) UpdateCollection(collectionName string, updates models.Collection) error {
 	updateValues := dbx.Params{
 		"description": updates.Description,

@@ -11,6 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// handles the creation of a new book.
 func CreateBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -38,6 +39,7 @@ func CreateBook(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "created", "data": book.ID})
 }
 
+// handles the creation of a new collection.
 func CreateCollection(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -65,6 +67,7 @@ func CreateCollection(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"status": "collection created"})
 }
 
+// handles adding a book to a collection.
 func CollectBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -94,6 +97,7 @@ func CollectBook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Book added to collection successfully"})
 }
 
+// handles removing a book from a collection.
 func DiscardBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -113,6 +117,7 @@ func DiscardBook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Book removed from collection successfully"})
 }
 
+// handles the deletion of a book.
 func DeleteBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -135,6 +140,7 @@ func DeleteBook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Book deleted successfully"})
 }
 
+// handles the deletion of a collection.
 func DeleteCollection(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -157,6 +163,7 @@ func DeleteCollection(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": "Collection deleted successfully"})
 }
 
+// handles getting all collections.
 func GetAllCollection(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -209,6 +216,7 @@ func parseQuery(values url.Values) (models.QueryFilter, error) {
 	return filter, nil
 }
 
+// handles querying books with various filters.
 func Query(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -234,6 +242,7 @@ func Query(c *gin.Context) {
 	c.JSON(http.StatusOK, books)
 }
 
+// handles updating book information.
 func UpdateBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
@@ -274,6 +283,7 @@ func UpdateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, updates)
 }
 
+// handles updating collection information.
 func UpdateCollection(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
