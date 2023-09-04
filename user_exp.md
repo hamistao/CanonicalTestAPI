@@ -4,7 +4,7 @@ The Virtual Library CLI allows the user to add, manage and query books on the Vi
 
 ## Commands
 
-### vl_add
+### vl add
 
 Add a book or list of books to the Virtual Library. Must be used with a book title(-t) or the path to a csv file with a list of books to be added.
 
@@ -42,7 +42,7 @@ $echo "Sample_Book_Title,,Sample_Author,,Fiction,Sample_Publisher,10-06-2002" > 
 $vl_add -f library.csv
 ```
 
-### vl_remove
+### vl remove
 
 Removes books to the Virtual Library. Automatically removes it from all the collections it is a part of.
 
@@ -67,7 +67,7 @@ there are many books with that title:
 $vl_remove -i 9ef46af8-1265-47b4-a4e4-0d1dfc011358
 ```
 
-### vl_edit
+### vl edit
 Changes selected fields of a specific book in the Virtual Library.
 
 #### Usage
@@ -105,7 +105,7 @@ there are many books with that title:
 vl_edit -i 9ef46af8-1265-47b4-a4e4-0d1dfc011358 -a "Jane Doe" -g "Fiction"
 ```
 
-### vl_query
+### vl query
 
 Makes queries within the Virtual Library. The queries can use multiple filters and can include either books or collections. The output has format: 
 title | description | author | edition | genre | publisher | published_date
@@ -143,7 +143,7 @@ $vl_query -from 01-01-2000 -a "Sample Author"
 Sample Book | | Sample Author | | | | 10-06-2002
 ```
 
-### vl_collect new
+### vl collect new
 
 Creates a new empty collection. If the name provided already exists the collection won't be created.
 
@@ -166,7 +166,7 @@ $vl_collect new -c "Favorite Books" -d "Her favorite books"
 there is already a collection named "Favorite Books"
 ```
 
-### vl_collect remove
+### vl collect remove
 
 Removes a book from a collection.
 
@@ -190,7 +190,7 @@ $vl_collect remove -c "Favorite Boks" -t "Bad Book"
 collection "Favorite Boks" doesn't exist
 ```
 
-### vl_collect edit
+### vl collect edit
 
 Sets a new name and/or a new description for a collection.
 
@@ -215,7 +215,7 @@ $vl_collect remove -c "Old Favorite Boks" -n "Older Favorite Books"
 collection "Favorite Boks" doesn't exist
 ```
 
-### vl_collect list
+### vl collect list
 
 Lists all existing collections.
 
@@ -231,7 +231,7 @@ Favorite Books - My favorite books - "Book 1", "Book 2"
 Old Favorite Books - My old favorite books - "Old Book 1", "Old Book 2"
 ```
 
-### vl_collect add
+### vl collect add
 
 Add a book or list of books into a collection.
 
