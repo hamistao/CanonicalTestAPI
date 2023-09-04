@@ -7,9 +7,8 @@ import (
 )
 
 type Config struct {
-	ServerPort          int    `yaml:"server_port"`
-	BooksFilePath       string `yaml:"books_file_path"`
-	CollectionsFilePath string `yaml:"collections_file_path"`
+	ServerPort int    `yaml:"server_port"`
+	DSN        string `yaml:"dsn"`
 }
 
 func Load(file string) (*Config, error) {

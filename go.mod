@@ -4,6 +4,9 @@ go 1.21.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-ozzo/ozzo-dbx v1.5.0
+	github.com/lib/pq v1.10.9
+	github.com/mitchellh/mapstructure v1.5.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
