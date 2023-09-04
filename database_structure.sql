@@ -1,22 +1,23 @@
-CREATE TABLE Books (
+CREATE TABLE Book (
     id UUID PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    genre VARCHAR(100) NOT NULL,
     author VARCHAR(255),
     publish_date VARCHAR(50),
-    genre VARCHAR(100),
     edition VARCHAR(50),
     publisher VARCHAR(255),
     description TEXT,
-    CONSTRAINT unique_book_uuid UNIQUE (book_uuid)
+    CONSTRAINT unique_book_uuid UNIQUE (id)
 );
 
-CREATE TABLE Collections (
-    name VARCHAR(255) PRIMARY KEY,
-    description TEXT
+CREATE TABLE Collection (
+    id VARCHAR(255) PRIMARY KEY,
+    description TEXT,
+    CONSTRAINT unique_collection_name UNIQUE (id)
 );
 
-CREATE TABLE CollectionBooks (
-    collection_uuid UUID REFERENCES Collections(collection_uuid),
-    book_uuid UUID REFERENCES Books(book_uuid),
-    PRIMARY KEY (collection_uuid, book_uuid)
+CREATE TABLE CollectionBook (
+    collection_name VARCHAR(255) REFERENCES Collection(id),
+    book_uuid UUID REFERENCES Book(id),
+    PRIMARY KEY (collection_name, book_uuid)
 );
