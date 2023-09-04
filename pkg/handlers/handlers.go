@@ -11,6 +11,25 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// handles getting a specific book by its ID.
+func GetBook(c *gin.Context) {
+	sv_raw, _ := c.Get("service")
+	sv, ok := sv_raw.(service.Service)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Couldn't connect to database"})
+		return
+	}
+
+	bookID := c.Param("id")
+	book, err := sv.GetBook(bookID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Book doesn't exist"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"status": "sucess", "data": book})
+}
+
 // handles the creation of a new book.
 func CreateBook(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
@@ -31,12 +50,13 @@ func CreateBook(c *gin.Context) {
 		return
 	}
 
-	if err := sv.InsertBook(book); err != nil {
+	id, err := sv.InsertBook(book)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "created", "data": book.ID})
+	c.JSON(http.StatusCreated, gin.H{"status": "created", "data": id})
 }
 
 // handles the creation of a new collection.
@@ -64,7 +84,7 @@ func CreateCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "collection created"})
+	c.JSON(http.StatusCreated, gin.H{"status": "created"})
 }
 
 // handles adding a book to a collection.
@@ -94,7 +114,7 @@ func CollectBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Book added to collection successfully"})
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // handles removing a book from a collection.
@@ -109,12 +129,27 @@ func DiscardBook(c *gin.Context) {
 	collectionName := c.Param("name")
 	bookID := c.Param("id")
 
+	if _, err := sv.GetBook(bookID); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Book doesn't exist"})
+		return
+	}
+
+	if _, err := sv.GetCollection(collectionName); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Collection doesn't exist"})
+		return
+	}
+
+	if !sv.BelongsTo(collectionName, bookID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "book isn't a part of this collection"})
+		return
+	}
+
 	if err := sv.Discard(collectionName, bookID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Book removed from collection successfully"})
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // handles the deletion of a book.
@@ -137,7 +172,7 @@ func DeleteBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Book deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // handles the deletion of a collection.
@@ -160,11 +195,11 @@ func DeleteCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "Collection deleted successfully"})
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 // handles getting all collections.
-func GetAllCollection(c *gin.Context) {
+func GetAllCollections(c *gin.Context) {
 	sv_raw, _ := c.Get("service")
 	sv, ok := sv_raw.(service.Service)
 	if !ok {
@@ -178,7 +213,7 @@ func GetAllCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, collections)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": collections})
 }
 
 func parseQuery(values url.Values) (models.QueryFilter, error) {
@@ -206,11 +241,11 @@ func parseQuery(values url.Values) (models.QueryFilter, error) {
 
 	decoder, err := mapstructure.NewDecoder(config)
 	if err != nil {
-		return models.QueryFilter{}, nil
+		return models.QueryFilter{}, err
 	}
 
 	if err := decoder.Decode(flattened); err != nil {
-		return models.QueryFilter{}, nil
+		return models.QueryFilter{}, err
 	}
 
 	return filter, nil
@@ -239,7 +274,7 @@ func Query(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, books)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": books})
 }
 
 // handles updating book information.
@@ -280,7 +315,7 @@ func UpdateBook(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, updates)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": updates})
 }
 
 // handles updating collection information.
@@ -320,5 +355,5 @@ func UpdateCollection(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, updates)
+	c.JSON(http.StatusOK, gin.H{"status": "success", "data": updates})
 }

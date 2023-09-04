@@ -18,11 +18,12 @@ func Router(serv service.Service) *gin.Engine {
 
 	router.POST("/book", handlers.CreateBook)
 	router.GET("/books", handlers.Query)
+	router.GET("/book/:id", handlers.GetBook)
 	router.DELETE("/book/:id", handlers.DeleteBook)
 	router.PATCH("/book/:id", handlers.UpdateBook)
 	router.POST("/collection", handlers.CreateCollection)
 	router.PATCH("/collection/:name", handlers.UpdateCollection)
-	router.GET("/collections", handlers.GetAllCollection)
+	router.GET("/collections", handlers.GetAllCollections)
 	router.DELETE("/collection/:name", handlers.DeleteCollection)
 	router.POST("/collection/:name/:id", handlers.CollectBook)
 	router.DELETE("/collection/:name/:id", handlers.DiscardBook)

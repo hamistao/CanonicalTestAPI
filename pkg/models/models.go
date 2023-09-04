@@ -4,10 +4,10 @@ package models
 type Book struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
+	Genre       string `json:"genre"`
 	Description string `json:"description"`
 	Author      string `json:"author"`
 	Edition     string `json:"edition"`
-	Genre       string `json:"genre"`
 	Publisher   string `json:"publisher"`
 	PublishDate string `json:"pub_date"`
 }
@@ -20,13 +20,13 @@ type Collection struct {
 
 // Used as a filter to query books with.
 type QueryFilter struct {
-	TitleFilter      string `json:"titleFilter"`
-	CollectionFilter string `json:"collection"`
-	AuthorFilter     string `json:"authorFilter"`
-	GenreFilter      string `json:"genreFilter"`
-	PubFilter        string `json:"pubFilter"`
-	EditionFilter    string `json:"editionFilter"`
-	From             string `json:"from"`
-	To               string `json:"to"`
-	Max              int64  `json:"max"`
+	Title      string
+	Collection string
+	Author     string
+	Genre      string
+	Publisher  string
+	Edition    string
+	From       string
+	To         string
+	Max        int64
 }

@@ -32,19 +32,19 @@ func (sv *Service) GetCollection(name string) (models.Collection, error) {
 }
 
 // inserts a new book into the database.
-func (sv *Service) InsertBook(book models.Book) error {
+func (sv *Service) InsertBook(book models.Book) (string, error) {
 	uuid, err := exec.Command("uuidgen").Output()
 	if err != nil {
-		return err
+		return "", err
 	}
 	id := string(uuid)
 	book.ID = id[:len(id)-1]
 
 	if err := sv.DB.Model(&book).Insert(); err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return book.ID, nil
 }
 
 // inserts a new collection into the database.
@@ -66,6 +66,12 @@ func (sv *Service) Collect(collectionName, bookID string) error {
 func (sv *Service) Discard(collectionName, bookID string) error {
 	_, err := sv.DB.Delete("collectionbook", dbx.HashExp{"collection_name": collectionName, "book_uuid": bookID}).Execute()
 	return err
+}
+
+func (sv *Service) BelongsTo(collectionName, bookID string) bool {
+	var out dbx.NullStringMap
+	err := sv.DB.Select("*").From("collectionbook").Where(dbx.HashExp{"collection_name": collectionName}).AndWhere(dbx.HashExp{"book_uuid": bookID}).One(&out)
+	return err == nil
 }
 
 // deletes a book from the database.
@@ -102,45 +108,56 @@ func (sv *Service) GetAllCollections() ([]models.Collection, error) {
 
 // performs a filtered query for books in the database.
 func (sv *Service) Query(filter models.QueryFilter) ([]models.Book, error) {
-	query := sv.DB.Select("*").From("book")
+	var query *dbx.SelectQuery
 
-	if filter.Max > 0 {
-		query = query.Limit(filter.Max)
+	if filter.Collection != "" {
+		query = sv.DB.Select("b.*").
+			From("book b").
+			InnerJoin("collectionbook cb", dbx.NewExp("b.id = cb.book_uuid")).
+			Where(dbx.HashExp{"cb.collection_name": filter.Collection})
+	} else {
+		query = sv.DB.Select("*").From("book")
 	}
-	if filter.TitleFilter != "" {
-		query = query.AndWhere(dbx.Like("title", filter.TitleFilter))
-	}
-	if filter.AuthorFilter != "" {
-		query = query.AndWhere(dbx.Like("author", filter.AuthorFilter))
-	}
-	if filter.GenreFilter != "" {
-		query = query.AndWhere(dbx.Like("genre", filter.GenreFilter))
-	}
-	if filter.PubFilter != "" {
-		query = query.AndWhere(dbx.Like("publisher", filter.PubFilter))
-	}
-	if filter.EditionFilter != "" {
-		query = query.AndWhere(dbx.Like("edition", filter.EditionFilter))
-	}
-	if filter.From != "" || filter.To != "" {
-		query = query.AndWhere(dbx.NewExp("publish_date IS NOT NULL"))
-		if filter.From != "" {
-			query = query.AndWhere(dbx.NewExp("TO_DATE(publish_date, 'MM-DD-YYYY') >= TO_DATE({:from}, 'MM-DD-YYYY')", dbx.Params{"from": filter.From}))
-		}
-		if filter.To != "" {
-			query = query.AndWhere(dbx.NewExp("TO_DATE(publish_date, 'MM-DD-YYYY') <= TO_DATE({:to}, 'MM-DD-YYYY')", dbx.Params{"to": filter.To}))
-		}
-	}
-	if filter.CollectionFilter != "" {
-		query = query.
-			Join("INNER", "collectionbook", dbx.NewExp("book.id = collectionbook.book_uuid")).
-			Where(dbx.NewExp("collectionbook.collection_name = {:collection}", dbx.Params{"collection": filter.CollectionFilter}))
-	}
+
+	query = addFilters(query, filter)
 
 	var books []models.Book
 	err := query.All(&books)
 
 	return books, err
+}
+
+func addFilters(query *dbx.SelectQuery, filter models.QueryFilter) *dbx.SelectQuery {
+	if filter.Max > 0 {
+		query = query.Limit(filter.Max)
+	}
+	if filter.Title != "" {
+		query = query.AndWhere(dbx.Like("title", filter.Title))
+	}
+	if filter.Author != "" {
+		query = query.AndWhere(dbx.Like("author", filter.Author))
+	}
+	if filter.Genre != "" {
+		query = query.AndWhere(dbx.Like("genre", filter.Genre))
+	}
+	if filter.Publisher != "" {
+		query = query.AndWhere(dbx.Like("publisher", filter.Publisher))
+	}
+	if filter.Edition != "" {
+		query = query.AndWhere(dbx.Like("edition", filter.Edition))
+	}
+	if filter.From != "" {
+		query = query.
+			AndWhere(dbx.NewExp("publish_date IS NOT NULL AND publish_date != ''")).
+			AndWhere(dbx.NewExp("TO_DATE(publish_date, 'MM-DD-YYYY') >= TO_DATE({:from}, 'MM-DD-YYYY')", dbx.Params{"from": filter.From}))
+	}
+	if filter.To != "" {
+		query = query.
+			AndWhere(dbx.NewExp("publish_date IS NOT NULL AND publish_date != ''")).
+			AndWhere(dbx.NewExp("TO_DATE(publish_date, 'MM-DD-YYYY') <= TO_DATE({:to}, 'MM-DD-YYYY')", dbx.Params{"to": filter.To}))
+	}
+
+	return query
 }
 
 // updates book information in the database.
